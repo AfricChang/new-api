@@ -19,16 +19,24 @@ type ThemeAssets struct {
 	DefaultIndexPage []byte
 	ClassicBuildFS   embed.FS
 	ClassicIndexPage []byte
+	DocsPage         []byte
 }
 
 func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 	defaultFS := common.EmbedFolder(assets.DefaultBuildFS, "web/default/dist")
 	classicFS := common.EmbedFolder(assets.ClassicBuildFS, "web/classic/dist")
 	themeFS := common.NewThemeAwareFS(defaultFS, classicFS)
+	serveDocsPage := func(c *gin.Context) {
+		c.Header("Cache-Control", "no-cache")
+		c.Data(http.StatusOK, "text/html; charset=utf-8", assets.DocsPage)
+	}
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(middleware.GlobalWebRateLimit())
 	router.Use(middleware.Cache())
+	router.GET("/docs", serveDocsPage)
+	router.GET("/docs/", serveDocsPage)
+	router.GET("/docs/index.html", serveDocsPage)
 	router.Use(static.Serve("/", themeFS))
 	router.NoRoute(func(c *gin.Context) {
 		c.Set(middleware.RouteTagKey, "web")

@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex 与 Claude Code 接入文档</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f8fb;
+        --surface: #ffffff;
+        --surface-soft: #f2f5f8;
+        --text: #152033;
+        --muted: #657084;
+        --line: #dce3eb;
+        --accent: #0f7b6c;
+        --accent-dark: #075d53;
+        --code: #101828;
+        --code-bg: #edf2f7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, "Public Sans", "Segoe UI", "PingFang SC", "Microsoft YaHei",
+          Arial, sans-serif;
+        line-height: 1.68;
+      }
+
+      a {
+        color: var(--accent-dark);
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .wrap {
+        width: min(1080px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        padding: 44px 0 36px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent-dark);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 5vw, 48px);
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 760px;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      nav a {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: var(--surface-soft);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      main {
+        padding: 28px 0 56px;
+      }
+
+      section {
+        margin: 18px 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 24px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.25;
+      }
+
+      h3 {
+        margin: 22px 0 8px;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 8px 0;
+      }
+
+      ul,
+      ol {
+        margin: 8px 0 0;
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 6px;
+      }
+
+      code {
+        border-radius: 6px;
+        background: var(--code-bg);
+        color: var(--code);
+        padding: 2px 5px;
+        font-family:
+          "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono",
+          monospace;
+        font-size: 0.92em;
+      }
+
+      pre {
+        margin: 12px 0 0;
+        overflow-x: auto;
+        border-radius: 8px;
+        background: #101828;
+        color: #eef4ff;
+        padding: 16px;
+        line-height: 1.55;
+      }
+
+      pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .note {
+        border-left: 4px solid var(--accent);
+        background: #eef8f5;
+        padding: 12px 14px;
+        color: #22463f;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--surface-soft);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 22px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        section {
+          padding: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap hero">
+        <p class="eyebrow">Actorus New API</p>
+        <h1>Codex 与 Claude Code 接入文档</h1>
+        <p class="lead">
+          这里记录当前对外分发的 API 使用方式。用户只需要使用管理员发放的
+          new-api Token，不需要知道本机 CPA 或 Cloudflare Tunnel 的内部配置。
+        </p>
+        <nav aria-label="文档导航">
+          <a href="#quick">快速信息</a>
+          <a href="#token">获取 Token</a>
+          <a href="#codex">Codex 配置</a>
+          <a href="#claude-code">Claude Code 配置</a>
+          <a href="#models">模型与价格</a>
+          <a href="#troubleshooting">常见问题</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section id="quick">
+        <h2>快速信息</h2>
+        <div class="grid">
+          <div>
+            <h3>控制台</h3>
+            <p><a href="https://newapi.actorus.top">https://newapi.actorus.top</a></p>
+          </div>
+          <div>
+            <h3>OpenAI-compatible Base URL</h3>
+            <p><code>https://newapi.actorus.top/v1</code></p>
+          </div>
+          <div>
+            <h3>Claude-compatible API Endpoint</h3>
+            <p><code>https://newapi.actorus.top/v1/messages</code></p>
+          </div>
+          <div>
+            <h3>鉴权方式</h3>
+            <p><code>Authorization: Bearer sk-...</code> 或 <code>x-api-key: sk-...</code></p>
+          </div>
+        </div>
+        <p class="note">
+          对外只使用 <code>https://newapi.actorus.top</code>。不要使用
+          <code>dev.actorus.top</code>，那是旧的 CPA 直连入口，无法按用户统计额度。
+        </p>
+      </section>
+
+      <section id="token">
+        <h2>获取 Token</h2>
+        <ol>
+          <li>联系管理员创建账号并分配额度。</li>
+          <li>登录 <a href="https://newapi.actorus.top">new-api 控制台</a>。</li>
+          <li>进入“令牌管理”，创建一个新 Token。</li>
+          <li>复制形如 <code>sk-...</code> 的 Token，用于下面的 Codex 或 Claude Code 配置。</li>
+        </ol>
+        <p>
+          Token 与用户额度绑定。不要把自己的 Token 发给其他人，否则用量会计入你的账号。
+        </p>
+      </section>
+
+      <section id="codex">
+        <h2>Codex 配置</h2>
+        <p>
+          Codex 走 OpenAI-compatible 接口。Base URL 要包含 <code>/v1</code>。
+        </p>
+
+        <h3>Windows PowerShell 临时配置</h3>
+        <pre><code>$env:OPENAI_API_KEY = "sk-your-new-api-token"
+codex -m gpt-5.5</code></pre>
+
+        <h3>推荐的 <code>%USERPROFILE%\.codex\config.toml</code></h3>
+        <pre><code>preferred_auth_method = "apikey"
+model_provider = "actorus-newapi"
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+
+[model_providers.actorus-newapi]
+name = "Actorus New API"
+base_url = "https://newapi.actorus.top/v1"
+requires_openai_auth = true
+wire_api = "responses"</code></pre>
+
+        <p>配置好后执行下面的命令，把 new-api Token 写入 Codex 本地凭据：</p>
+        <pre><code>$env:OPENAI_API_KEY = "sk-your-new-api-token"
+$env:OPENAI_API_KEY | codex login --with-api-key</code></pre>
+
+        <h3>测试命令</h3>
+        <pre><code>codex exec -m gpt-5.5 "用一句话回答：连接是否正常？"</code></pre>
+
+        <p>
+          如果某些模型不支持 Responses API，可把 <code>wire_api</code> 改为
+          <code>chat</code> 后再测试。
+        </p>
+      </section>
+
+      <section id="claude-code">
+        <h2>Claude Code 配置</h2>
+        <p>
+          Claude Code 走 Claude-compatible 接口。Base URL 通常填写域名根地址，不要带
+          <code>/v1</code>，客户端会请求 <code>/v1/messages</code>。
+        </p>
+
+        <h3>Windows PowerShell 临时配置</h3>
+        <pre><code>$env:ANTHROPIC_BASE_URL = "https://newapi.actorus.top"
+$env:ANTHROPIC_AUTH_TOKEN = "sk-your-new-api-token"
+$env:ANTHROPIC_MODEL = "claude-sonnet-4.6"
+$env:ANTHROPIC_SMALL_FAST_MODEL = "claude-sonnet-4.6"
+claude</code></pre>
+
+        <p>
+          如果你的 Claude Code 版本只读取 <code>ANTHROPIC_API_KEY</code>，可以额外设置：
+        </p>
+        <pre><code>$env:ANTHROPIC_API_KEY = "sk-your-new-api-token"</code></pre>
+
+        <h3>测试命令</h3>
+        <pre><code>claude -p --model claude-sonnet-4.6 "用一句话回答：连接是否正常？"</code></pre>
+
+        <h3>Claude-compatible curl 测试</h3>
+        <pre><code>curl https://newapi.actorus.top/v1/messages ^
+  -H "content-type: application/json" ^
+  -H "anthropic-version: 2023-06-01" ^
+  -H "x-api-key: sk-your-new-api-token" ^
+  -d "{\"model\":\"claude-sonnet-4.6\",\"max_tokens\":128,\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}"</code></pre>
+      </section>
+
+      <section id="models">
+        <h2>模型与价格</h2>
+        <p>
+          可用模型以控制台“模型广场”和 <code>/v1/models</code> 返回结果为准。
+          常用模型示例：
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>用途</th>
+                <th>建议模型</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Codex 主力</td>
+                <td><code>gpt-5.5</code>、<code>gpt-5.4</code></td>
+                <td>适合代码生成、重构、复杂任务。</td>
+              </tr>
+              <tr>
+                <td>Codex 低成本</td>
+                <td><code>gpt-5.4-mini</code>、<code>gpt-5.3-codex</code></td>
+                <td>适合日常问答、轻量代码任务。</td>
+              </tr>
+              <tr>
+                <td>Claude Code 主力</td>
+                <td><code>claude-sonnet-4.6</code>、<code>claude-opus-4.5</code></td>
+                <td>适合长上下文代码理解和审阅。</td>
+              </tr>
+              <tr>
+                <td>其他模型</td>
+                <td><code>deepseek-3.2</code>、<code>qwen3-coder-next</code>、<code>glm-5</code></td>
+                <td>实际可用性以账号分组和渠道状态为准。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>常见问题</h2>
+        <h3>401 Unauthorized</h3>
+        <p>Token 错误、Token 被禁用，或额度不足。请重新复制 new-api 控制台里的 Token。</p>
+
+        <h3>Codex 连接失败</h3>
+        <p>
+          检查 <code>base_url</code> 是否为 <code>https://newapi.actorus.top/v1</code>，
+          并确认已通过 <code>codex login --with-api-key</code> 写入 Token。
+        </p>
+
+        <h3>Claude Code 出现 404 或请求路径异常</h3>
+        <p>
+          检查 <code>ANTHROPIC_BASE_URL</code> 是否为
+          <code>https://newapi.actorus.top</code>。如果写成
+          <code>https://newapi.actorus.top/v1</code>，客户端可能会请求到错误路径。
+        </p>
+
+        <h3>模型不可用</h3>
+        <p>
+          模型可能未分配到你的用户分组，或上游渠道临时不可用。请换一个模型测试，或联系管理员检查渠道。
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>最后更新：2026-05-12。本文档地址：<code>https://newapi.actorus.top/docs/index.html</code></p>
+      </div>
+    </footer>
+  </body>
+</html>
