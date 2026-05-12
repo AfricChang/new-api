@@ -3,6 +3,7 @@ package router
 import (
 	"embed"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -27,6 +28,15 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 	classicFS := common.EmbedFolder(assets.ClassicBuildFS, "web/classic/dist")
 	themeFS := common.NewThemeAwareFS(defaultFS, classicFS)
 	serveDocsPage := func(c *gin.Context) {
+		docsPath := strings.TrimSpace(os.Getenv("DOCS_HTML_PATH"))
+		if docsPath == "" {
+			docsPath = "/docs/index.html"
+		}
+		if docsPage, err := os.ReadFile(docsPath); err == nil {
+			c.Header("Cache-Control", "no-cache")
+			c.Data(http.StatusOK, "text/html; charset=utf-8", docsPage)
+			return
+		}
 		c.Header("Cache-Control", "no-cache")
 		c.Data(http.StatusOK, "text/html; charset=utf-8", assets.DocsPage)
 	}
