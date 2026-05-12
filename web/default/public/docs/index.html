@@ -139,19 +139,46 @@
       }
 
       pre {
+        position: relative;
         margin: 12px 0 0;
         overflow-x: auto;
         border-radius: 8px;
         background: #101828;
         color: #eef4ff;
-        padding: 16px;
+        padding: 16px 88px 16px 16px;
         line-height: 1.55;
       }
 
       pre code {
+        display: block;
         background: transparent;
         color: inherit;
         padding: 0;
+      }
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        min-width: 58px;
+        border: 1px solid rgba(238, 244, 255, 0.22);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #eef4ff;
+        padding: 5px 9px;
+        font: inherit;
+        font-size: 12px;
+        line-height: 1.2;
+        cursor: pointer;
+      }
+
+      .copy-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .copy-button:focus-visible {
+        outline: 2px solid #a7f3d0;
+        outline-offset: 2px;
       }
 
       .grid {
@@ -404,5 +431,49 @@ claude</code></pre>
         <p>最后更新：2026-05-12。本文档地址：<code>https://newapi.actorus.top/docs/index.html</code></p>
       </div>
     </footer>
+    <script>
+      const copyText = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.setAttribute("readonly", "");
+        textArea.style.position = "fixed";
+        textArea.style.top = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      };
+
+      document.querySelectorAll("pre").forEach((pre) => {
+        const code = pre.querySelector("code");
+        if (!code) return;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "copy-button";
+        button.textContent = "复制";
+        button.setAttribute("aria-label", "复制代码");
+        pre.appendChild(button);
+
+        button.addEventListener("click", async () => {
+          const originalText = button.textContent;
+          try {
+            await copyText(code.textContent.trim());
+            button.textContent = "已复制";
+          } catch {
+            button.textContent = "失败";
+          }
+
+          window.setTimeout(() => {
+            button.textContent = originalText;
+          }, 1600);
+        });
+      });
+    </script>
   </body>
 </html>
