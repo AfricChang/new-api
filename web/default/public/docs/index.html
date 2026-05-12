@@ -276,10 +276,6 @@
             <p><code>Authorization: Bearer sk-...</code> 或 <code>x-api-key: sk-...</code></p>
           </div>
         </div>
-        <p class="note">
-          对外只使用 <code>https://newapi.actorus.top</code>。不要使用
-          <code>dev.actorus.top</code>，那是旧的 CPA 直连入口，无法按用户统计额度。
-        </p>
       </section>
 
       <section id="token">
@@ -321,12 +317,9 @@ wire_api = "responses"</code></pre>
         <pre><code>$env:OPENAI_API_KEY = "sk-your-new-api-token"
 $env:OPENAI_API_KEY | codex login --with-api-key</code></pre>
 
-        <h3>测试命令</h3>
-        <pre><code>codex exec -m gpt-5.5 "用一句话回答：连接是否正常？"</code></pre>
-
         <p>
           如果某些模型不支持 Responses API，可把 <code>wire_api</code> 改为
-          <code>chat</code> 后再测试。
+          <code>chat</code>。
         </p>
       </section>
 
@@ -349,15 +342,6 @@ claude</code></pre>
         </p>
         <pre><code>$env:ANTHROPIC_API_KEY = "sk-your-new-api-token"</code></pre>
 
-        <h3>测试命令</h3>
-        <pre><code>claude -p --model claude-sonnet-4.6 "用一句话回答：连接是否正常？"</code></pre>
-
-        <h3>Claude-compatible curl 测试</h3>
-        <pre><code>curl https://newapi.actorus.top/v1/messages ^
-  -H "content-type: application/json" ^
-  -H "anthropic-version: 2023-06-01" ^
-  -H "x-api-key: sk-your-new-api-token" ^
-  -d "{\"model\":\"claude-sonnet-4.6\",\"max_tokens\":128,\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}"</code></pre>
       </section>
 
       <section id="models">
